@@ -68,8 +68,8 @@ const getGames = (game: any) => {
                 </amp-story-grid-layer>
 
                 <amp-story-grid-layer template='thirds'>
-                    <h1 grid-area='upper-third'>{game.matchupData.description}</h1>
-                    <div grid-area='lower-third'>
+                    <h2 grid-area='upper-third'>{game.matchupData.description}</h2>
+                    <div grid-area='middle-third'>
                         <div style={{ display: 'flex', margin: '15px' }}>
                             <amp-img
                                 src={`https://img.mlbstatic.com/mlb-photos/image/upload/w_144,h_144,c_pad/u_team:${game.teams.away.team.id}:fill:spot,ar_1:1,w_240/r_max,f_png,q_auto:best/v1/team/${game.teams.away.team.id}/logo/spot/current`}
@@ -78,9 +78,13 @@ const getGames = (game: any) => {
                                 layout='fixed'
                                 alt={`Home team: ${game.teams.home.team.name}`}
                             ></amp-img>
-                            <div style={{ padding: '15px 5px', textAlign: 'center' }}>
-                                <h3>W: {game.teams.away.leagueRecord.wins}</h3>
-                                <h3>L: {game.teams.away.leagueRecord.losses}</h3>
+                            <div style={{ padding: '15px 10px', textAlign: 'left' }}>
+                                <h3>Score: {game.teams.away.score}</h3>
+                                <hr />
+                                <h4>
+                                    W: {game.teams.away.leagueRecord.wins} | L:
+                                    {game.teams.away.leagueRecord.losses}
+                                </h4>
                             </div>
                         </div>
                         <div style={{ display: 'flex', padding: '15px' }}>
@@ -91,9 +95,13 @@ const getGames = (game: any) => {
                                 layout='fixed'
                                 alt={`Away team: ${game.teams.away.team.name}`}
                             ></amp-img>
-                            <div style={{ padding: '15px 5px', textAlign: 'center' }}>
-                                <h3>W: {game.teams.home.leagueRecord.wins}</h3>
-                                <h3>L: {game.teams.home.leagueRecord.losses}</h3>
+                            <div style={{ padding: '15px 10px', textAlign: 'left' }}>
+                                <h3>Score: {game.teams.home.score}</h3>
+                                <hr />
+                                <h4>
+                                    W: {game.teams.home.leagueRecord.wins} | L:{' '}
+                                    {game.teams.home.leagueRecord.losses}
+                                </h4>
                             </div>
                         </div>
                     </div>
@@ -115,12 +123,7 @@ const getGames = (game: any) => {
                         layout='fill'
                     ></amp-video>
                 </amp-story-grid-layer>
-                <amp-story-grid-layer template='thirds'>
-                    <Hint className='video-hint' grid-layout='bottom-third'>
-                        Rotate for fullscreen
-                    </Hint>
-                </amp-story-grid-layer>
-                <amp-story-grid-layer template='vertical' className='bottom'>
+                <amp-story-grid-layer template='vertical'>
                     <h1>{game.matchupData.date}</h1>
                 </amp-story-grid-layer>
             </amp-story-page>
