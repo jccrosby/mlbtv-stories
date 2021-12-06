@@ -124,7 +124,7 @@ const getGames = (game: any) => {
                     ></amp-video>
                 </amp-story-grid-layer>
                 <amp-story-grid-layer template='vertical'>
-                    <h1>{game.matchupData.date}</h1>
+                    <div class='video-hint'>{game.matchupData.date}</div>
                 </amp-story-grid-layer>
             </amp-story-page>
         </>

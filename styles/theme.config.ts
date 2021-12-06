@@ -109,26 +109,23 @@ export const GlobalStyles = createGlobalStyle`
     .bottom {
         align-content: end;
     }
-    #video-hint {
+    .video-hint {
         /* Position relative to its container: */
         position: absolute;
-        right: 0;
-        bottom: 25%;
+        left: 0;
+        bottom: 1%;
         /* Typography: */
         line-height: 1;
         font-size: 13px;
         /* Borders, colors and sizing */
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-        border-radius: 16px 0 0 16px;
+        border-radius: 0 16px 16px 0;
         background: rgba(0, 0, 0, 0.8);
         color: white;
         padding: 10px 16px;
         /* Position on top of the video: */
         z-index: 100;
-        /* Translate-x by 100% to displace out of view: */
-        transform: translateX(100%);
-        pointer-events: none;
-        display: none;
+        width: 100px;
     }
     /* Display hint only on touch devices */
     .amp-mode-touch #video-hint {
