@@ -35,7 +35,7 @@ class MyDocument extends Document {
             <Html>
                 <Head>
                     <link
-                        href='https://fonts.googleapis.com/css?family=Oswald:200,300,400'
+                        href='https://fonts.googleapis.com/css?family=Oswald:200,300,400?&display=optional'
                         rel='stylesheet'
                     />
                 </Head>
