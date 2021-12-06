@@ -4,13 +4,25 @@ import fetch from 'isomorphic-fetch';
 
 export const config = { amp: true };
 
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            'amp-story': any;
+            'amp-img': any;
+            'amp-story-page': any;
+            'amp-story-grid-layer': any;
+            'amp-video': any;
+        }
+    }
+}
+
 export async function getStaticProps(context: NextPageContext) {
     const response = await fetch(
         'https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2021-07-30&hydrate=game(content(media(all)))',
     );
     const json = await response.json();
     const gamesJson = json?.dates?.[0]?.games;
-    const games = gamesJson.map((game) => {
+    const games = gamesJson.map((game: any) => {
         const updatedGame = { ...game };
         const dailyRecapItem = game.content?.media?.epgAlternate?.find((epgItem: any) => {
             return epgItem.title === 'Daily Recap';
@@ -75,11 +87,13 @@ const getGames = (game: any) => {
     );
 };
 
-const Home: NextPage = ({ games }) => {
-    console.log(`games[0]`, games[0]);
+export interface HomeProps {
+    games: any[];
+}
+
+const Home: NextPage<HomeProps> = ({ games }) => {
     return (
         <>
-            <Head></Head>
             <amp-story
                 standalone='standalone'
                 title='Games for today'
