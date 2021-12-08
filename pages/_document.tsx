@@ -35,9 +35,19 @@ class MyDocument extends Document {
             <Html>
                 <Head>
                     <link
-                        href='https://fonts.googleapis.com/css?family=Oswald:200,300,400?&display=optional'
+                        href='https://fonts.googleapis.com/css?family=Oswald:200,300,400?display=optional'
                         rel='stylesheet'
                     />
+                    <script
+                        async
+                        custom-element='amp-story'
+                        src='https://cdn.ampproject.org/v0/amp-story-1.0.js'
+                    ></script>
+                    <script
+                        async
+                        custom-element='amp-video'
+                        src='https://cdn.ampproject.org/v0/amp-video-0.1.js'
+                    ></script>
                 </Head>
                 <body>
                     <Main />
