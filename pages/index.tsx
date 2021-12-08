@@ -43,7 +43,6 @@ export async function getStaticProps(context: NextPageContext) {
     const daysUrl = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=${endDate
         .plus({ days: -31 })
         .toISODate()}&endDate=${endDate.toISODate()}`;
-    console.log(`~~~~daysUrl`, daysUrl);
     const daysResponse = await fetch(daysUrl);
     const daysJson = await daysResponse.json();
     let dates = daysJson.dates;

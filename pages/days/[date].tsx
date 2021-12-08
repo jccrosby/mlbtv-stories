@@ -4,7 +4,6 @@ import fetch from 'isomorphic-fetch';
 import { useRouter } from 'next/router';
 import GamePage from '../../components/game/game-page';
 import GameStory from '../../components/game/game-story';
-import { Hint } from '../../styles/days/index.styles';
 
 export const config = { amp: true };
 
@@ -22,20 +21,6 @@ declare global {
         }
     }
 }
-
-/* export const getStaticPaths = async () => {
-    const paths = [];
-    let current = DateTime.fromISO('2021-03-26');
-    const end = DateTime.fromISO('2021-11-02');
-    while (current < end) {
-        paths.push({ params: { date: current.toISODate() } });
-        current = current.plus({ days: 1 });
-    }
-    return {
-        paths,
-        fallback: false,
-    };
-}; */
 
 export interface IGamesStoryPageContext extends NextPageContext {
     params: { [key: string]: any };
