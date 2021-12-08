@@ -1,7 +1,7 @@
 import type { NextPage, NextPageContext } from 'next';
 import { DateTime } from 'luxon';
 import fetch from 'isomorphic-fetch';
-import { Hint } from '../styles/index.styles';
+import { Hint, SeasonLink, SeasonListItem, SeasonUnorderedList } from '../styles/index.styles';
 
 export const config = { amp: true };
 
@@ -16,136 +16,80 @@ declare global {
             'amp-story-animation': any;
             'amp-animation': any;
             'amp-date-display': any;
+            'amp-date-picker': any;
         }
     }
 }
 
 export async function getStaticProps(context: NextPageContext) {
-    const response = await fetch(
-        'https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2021-07-30&hydrate=game(content(media(all)))',
-    );
-    const json = await response.json();
-    const gamesJson = json?.dates?.[0]?.games;
-    const games = gamesJson.map((game: any) => {
-        const updatedGame = { ...game };
-        const dailyRecapItem = game.content?.media?.epgAlternate?.find((epgItem: any) => {
-            return epgItem.title === 'Daily Recap';
-        });
-        const extendedHighlightItem = game.content?.media?.epgAlternate?.find((epgItem: any) => {
-            return epgItem.title === 'Extended Highlights';
-        });
-        const dailyRecap = dailyRecapItem.items?.[0];
-        const condensedGame = extendedHighlightItem.items?.[0];
-        updatedGame.matchupData = {
-            date: DateTime.fromISO(game.officialDate).toFormat('M/d/yyyy'),
-            title: `${game.teams.away.team.name} @ ${game.teams.home.team.name}`,
-            image: condensedGame?.image?.templateUrl?.replace(
-                '{formatInstructions}',
-                'w_720,h_1280,f_jpg,c_fill',
-            ),
-            description: dailyRecap?.description,
-            mp4: dailyRecap?.playbacks.find((playback: any) => playback.name === 'mp4Avc'),
-        };
-        return updatedGame;
+    const currentDate = DateTime.now();
+    const response = await fetch('https://statsapi.mlb.com/api/v1/seasons/all?sportId=1');
+    const responseJson = await response.json();
+    let seasons = responseJson?.seasons ?? [];
+    seasons = seasons.filter((season: ISeason) => {
+        const startDate = DateTime.fromISO(season.regularSeasonStartDate);
+        const diffDays = startDate.diff(currentDate, 'days').toObject().days || 0;
+        return diffDays <= 0;
     });
-    return { props: { games } };
+    const season: ISeason = seasons[seasons.length - 1];
+
+    const seasonEndDate = DateTime.fromISO(season.postSeasonEndDate);
+    let endDate = currentDate;
+
+    if (currentDate > seasonEndDate) {
+        endDate = seasonEndDate;
+    }
+
+    const daysUrl = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=${endDate
+        .plus({ days: -31 })
+        .toISODate()}&endDate=${endDate.toISODate()}`;
+    console.log(`~~~~daysUrl`, daysUrl);
+    const daysResponse = await fetch(daysUrl);
+    const daysJson = await daysResponse.json();
+    let dates = daysJson.dates;
+    dates = dates.sort((dateA: any, dateB: any) => {
+        const a = DateTime.fromISO(dateA.date);
+        const b = DateTime.fromISO(dateB.date);
+        if (a < b) {
+            return 1;
+        } else if (a > b) {
+            return -1;
+        } else {
+            return 0;
+        }
+    });
+
+    return { props: { dates } };
 }
 
-const getGames = (game: any) => {
-    const logoSize = 90;
-    return (
-        <>
-            <amp-story-page id={`condensed-game-${game.gamePk}`}>
-                <amp-story-grid-layer template='fill'>
-                    <amp-img
-                        src={game.matchupData.image}
-                        width='720'
-                        height='1280'
-                        layout='responsive'
-                        alt='...'
-                        class='image-scrim'
-                    ></amp-img>
-                </amp-story-grid-layer>
-
-                <amp-story-grid-layer template='thirds'>
-                    <h2 grid-area='upper-third'>{game.matchupData.description}</h2>
-                    <div grid-area='middle-third'>
-                        <div style={{ display: 'flex', margin: '15px' }}>
-                            <amp-img
-                                src={`https://img.mlbstatic.com/mlb-photos/image/upload/w_144,h_144,c_pad/u_team:${game.teams.away.team.id}:fill:spot,ar_1:1,w_240/r_max,f_png,q_auto:best/v1/team/${game.teams.away.team.id}/logo/spot/current`}
-                                width={logoSize}
-                                height={logoSize}
-                                layout='fixed'
-                                alt={`Home team: ${game.teams.home.team.name}`}
-                            ></amp-img>
-                            <div style={{ padding: '15px 10px', textAlign: 'left' }}>
-                                <h3>Score: {game.teams.away.score}</h3>
-                                <hr />
-                                <h4>
-                                    W: {game.teams.away.leagueRecord.wins} | L:
-                                    {game.teams.away.leagueRecord.losses}
-                                </h4>
-                            </div>
-                        </div>
-                        <div style={{ display: 'flex', padding: '15px' }}>
-                            <amp-img
-                                src={`https://img.mlbstatic.com/mlb-photos/image/upload/w_144,h_144,c_pad/u_team:${game.teams.home.team.id}:fill:spot,ar_1:1,w_240/r_max,f_png,q_auto:best/v1/team/${game.teams.home.team.id}/logo/spot/current`}
-                                width={logoSize}
-                                height={logoSize}
-                                layout='fixed'
-                                alt={`Away team: ${game.teams.away.team.name}`}
-                            ></amp-img>
-                            <div style={{ padding: '15px 10px', textAlign: 'left' }}>
-                                <h3>Score: {game.teams.home.score}</h3>
-                                <hr />
-                                <h4>
-                                    W: {game.teams.home.leagueRecord.wins} | L:{' '}
-                                    {game.teams.home.leagueRecord.losses}
-                                </h4>
-                            </div>
-                        </div>
-                    </div>
-                </amp-story-grid-layer>
-            </amp-story-page>
-
-            <amp-story-page
-                id={`condensed-game-video-${game.gamePk}`}
-                auto-advance-after={`video-mp4-${game.gamePk}`}
-            >
-                <amp-story-grid-layer template='fill'>
-                    <amp-video
-                        id={`video-mp4-${game.gamePk}`}
-                        src={game.matchupData.mp4.url}
-                        poster={game.matchupData.image}
-                        autoPlay='autoplay'
-                        width='1280'
-                        height='720'
-                        layout='fill'
-                    ></amp-video>
-                </amp-story-grid-layer>
-                <amp-story-grid-layer template='vertical'>
-                    <div className='video-hint'>{game.matchupData.date}</div>
-                </amp-story-grid-layer>
-            </amp-story-page>
-        </>
-    );
-};
-
+export interface ISeason {
+    seasonId: string;
+    preSeasonStartDate: string;
+    preSeasonEndDate: string;
+    postSeasonStartDate: string;
+    postSeasonEndDate: string;
+    regularSeasonStartDate: string;
+    regularSeasonEndDate: string;
+    seasonStartDate: string;
+    seasonEndDate: string;
+}
 export interface HomeProps {
-    games: any[];
+    dates: any[];
 }
 
-const Home: NextPage<HomeProps> = ({ games }) => {
+const Home: NextPage<HomeProps> = ({ dates }) => {
     return (
-        <amp-story
-            standalone='standalone'
-            title='Games for today'
-            publisher='John Crosby'
-            publisher-logo-src='https://example.com/logo/1x1.png'
-            poster-portrait-src={games[0].matchupData.image}
-        >
-            {!!games ? games.map((game) => getGames(game)) : <p>Loading...</p>}
-        </amp-story>
+        <SeasonUnorderedList>
+            {dates.map((date: any) => {
+                return (
+                    <SeasonListItem key={`game-date-${date.date}`}>
+                        <SeasonLink href={`/days/${date.date}`}>
+                            {DateTime.fromISO(date.date).toLocaleString(DateTime.DATE_MED)}
+                        </SeasonLink>
+                    </SeasonListItem>
+                );
+            })}
+        </SeasonUnorderedList>
     );
 };
 
